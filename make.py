@@ -21,6 +21,20 @@ from soc_linux import SoCLinux
 #---------------------------------------------------------------------------------------------------
 # Helpers
 #---------------------------------------------------------------------------------------------------
+def parse_kwargs(remaining):
+    kwargs = {}
+
+    for item in remaining:
+        item = item.lstrip("-")
+        split = item.split('=', 2)
+        key = split[0].replace('-', '_')
+        if len(key) == 0:
+            continue
+        if len(split) < 2:
+            kwargs[key] = True
+        else:
+            kwargs[key] = split[1]
+    return kwargs
 
 def camel_to_snake(name):
     name = re.sub(r'(?<=[a-z])(?=[A-Z])', '_', name)
@@ -63,6 +77,7 @@ def main():
     parser.add_argument("--rootfs",         default="ram0",              help="Location of the RootFS.",
         choices=["ram0", "mmcblk0p2"]
     )
+    parser.add_argument("soc_kwargs", nargs=argparse.REMAINDER)
     VexRiscvSMP.args_fill(parser)
     args = parser.parse_args()
 
@@ -77,6 +92,7 @@ def main():
         board = supported_boards[board_name]()
         soc_kwargs = Board.soc_kwargs
         soc_kwargs.update(board.soc_kwargs)
+        soc_kwargs.update(parse_kwargs(args.soc_kwargs))
 
         # CPU parameters ---------------------------------------------------------------------------
 
