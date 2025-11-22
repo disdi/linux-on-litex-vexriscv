@@ -199,10 +199,14 @@ def main():
 
         # DTS --------------------------------------------------------------------------------------
         soc.generate_dts(board_name, args.rootfs)
-        soc.compile_dts(board_name, args.fdtoverlays)
+        if hasattr(soc, "get_fdtoverlays"):
+            fdtoverlays = soc.get_fdtoverlays(board_name, args.fdtoverlays)
+        else:
+            fdtoverlays = args.fdtoverlays
+        soc.compile_dts(board_name, fdtoverlays)
 
         # DTB --------------------------------------------------------------------------------------
-        soc.combine_dtb(board_name, args.fdtoverlays)
+        soc.combine_dtb(board_name, fdtoverlays)
 
         # boot.json --------------------------------------------------------------------------------
         shutil.copyfile(f"images/boot_{args.rootfs}.json", "images/boot.json")
